@@ -42,7 +42,7 @@ def upload_file(request):
                 file_bytes = f.read()
 
             # 4. Call Gemini API
-            client = genai.Client(api_key="AIzaSyCj7kxy9hPkKkOiRZ3X3_bwydOY-rJYjNs")
+            client = genai.Client(api_key="Gemini_api_key")
 
             response = client.models.generate_content(
                 model="gemini-2.5-flash",
