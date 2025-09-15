@@ -1,0 +1,113 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title %}Files{% endblock %}
+
+{% block content %}
+<h2>Uploaded Files</h2>
+
+<!-- Messages -->
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    {% endfor %}
+{% endif %}
+
+<table class="table table-striped table-hover">
+    <thead class="thead-dark">
+        <tr>
+            <th>File Name</th>
+            <th>Uploaded By</th>
+            <th>File Type</th>
+            <th>File Size (Bytes)</th>
+            <th>Uploaded On</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for file in page_obj %}
+        <tr>
+            <td>{{ file.file.name|slice:"10:" }}</td>
+            <td>{{ file.uploaded_by }}</td>
+            <td>{{ file.file_type }}</td>
+            <td>{{ file.file_size }}</td>
+            <td>{{ file.uploaded_at|date:"d M Y H:i" }}</td>
+            <td>
+                <div class="btn-group" role="group">
+                    <!-- View Button -->
+                    <a href="{% url 'view_file' file.id %}" class="btn btn-sm btn-primary" target="_blank">
+                        <i class="fas fa-eye"></i> View
+                    </a>
+
+                    <!-- Download Button -->
+                    <a href="{% url 'download_file' file.id %}" class="btn btn-sm btn-success">
+                        <i class="fas fa-download"></i> Download
+                    </a>
+
+                    <a href="{% url 'view_report' file.id %}" class="btn btn-sm btn-info">
+                        <i class="fas fa-file-alt"></i> Report
+                    </a>
+
+                    <!-- Delete Button -->
+                    <form action="{% url 'delete_file' file.id %}" method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-danger"
+                                onclick="return confirm('Are you sure you want to delete this file?');">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </form>
+                </div>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6" class="text-center">No files uploaded yet.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Pagination -->
+<div class="mt-4">   <!-- spacing so pagination is pushed down -->
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">Previous</span>
+                </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                {% else %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">Next</span>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
+{% endblock %}

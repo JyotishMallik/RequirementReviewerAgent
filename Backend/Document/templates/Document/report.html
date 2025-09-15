@@ -1,0 +1,49 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title %}Report - {{ file.file.name }}{% endblock %}
+
+{% block content %}
+<h2>Report for {{ file.file.name|slice:"10:" }}</h2>
+<hr>
+
+<p><strong>Uploaded By:</strong> {{ file.uploaded_by }}</p>
+<p><strong>File Type:</strong> {{ file.file_type }}</p>
+<p><strong>File Size:</strong> {{ file.file_size }} bytes</p>
+<p><strong>Uploaded At:</strong> {{ file.uploaded_at|date:"d M Y H:i" }}</p>
+
+<div class="card shadow-sm">
+  <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+    <strong>Requirement Document Insights</strong>
+    <div>
+      <!-- Copy Button -->
+      <button class="btn btn-sm btn-outline-light mr-2" onclick="copyAnalysis()">Copy</button>
+      <!-- Download Button -->
+      <button class="btn btn-sm btn-outline-light" onclick="downloadAnalysis()">Download</button>
+    </div>
+  </div>
+  <div class="card-body markdown-body" id="analysisContent">
+    {{ clean_insights|safe }}
+  </div>
+</div>
+
+<script>
+function copyAnalysis() {
+    const text = document.getElementById("analysisContent").innerText;
+    navigator.clipboard.writeText(text).then(() => {
+        alert("Analysis copied to clipboard!");
+    });
+}
+
+function downloadAnalysis() {
+    const text = document.getElementById("analysisContent").innerText;
+    const blob = new Blob([text], { type: "text/plain" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "gemini_analysis.txt";
+    link.click();
+}
+</script>
+
+<a href="{% url 'show_files' %}" class="btn btn-secondary mt-3">Back to Files</a>
+{% endblock %}

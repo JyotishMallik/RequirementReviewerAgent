@@ -1,0 +1,89 @@
+/* Upload Container */
+.upload-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 30px;
+}
+
+.upload-card {
+    background: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+    text-align: center;
+    width: 100%;
+    max-width: 500px;
+}
+
+/* Drop Zone */
+.drop-zone {
+    border: 2px dashed #007bff;
+    border-radius: 12px;
+    padding: 40px;
+    background: #f8f9fa;
+    cursor: pointer;
+    transition: background 0.3s, border-color 0.3s;
+}
+.drop-zone.drag-over {
+    background: #e3f2fd;
+    border-color: #0056b3;
+}
+.file-icon {
+    font-size: 50px;
+    color: #007bff;
+    margin-bottom: 15px;
+}
+.or-text {
+    font-weight: bold;
+    margin: 10px 0;
+}
+
+/* Custom File Upload */
+.custom-file-upload {
+    display: inline-block;
+    cursor: pointer;
+    color: #007bff;
+    font-weight: 600;
+}
+.custom-file-upload:hover {
+    text-decoration: underline;
+}
+
+/* Selected File */
+.selected-file {
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+.selected-file span {
+    font-weight: 500;
+    color: #333;
+}
+
+/* Upload Button */
+.btn-upload {
+    background: #007bff;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+.btn-upload:hover {
+    background: #0056b3;
+}
+
+/* Progress Bar */
+.progress {
+    height: 25px;
+    border-radius: 12px;
+}
+.progress-bar {
+    font-weight: bold;
+    line-height: 25px;
+}
