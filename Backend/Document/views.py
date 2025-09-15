@@ -8,9 +8,15 @@ from .models import UploadFile
 from .utils import extract_text_from_file, PROMPT_TEMPLATE
 import google.generativeai as genai
 from google.genai import types
-import pathlib
 from google import genai
 import markdown2
+from ..Agent import settings
+
+
+
+
+
+
 
 # Upload file view
 def upload_file(request):
@@ -42,7 +48,7 @@ def upload_file(request):
                 file_bytes = f.read()
 
             # 4. Call Gemini API
-            client = genai.Client(api_key="Gemini_api_key")
+            client = genai.Client(api_key = settings.GEMINI_API_KEY)
 
             response = client.models.generate_content(
                 model="gemini-2.5-flash",
