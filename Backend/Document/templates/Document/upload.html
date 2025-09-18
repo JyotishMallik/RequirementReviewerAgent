@@ -4,56 +4,60 @@
 {% block title %}Upload Document{% endblock %}
 
 {% block content %}
-<div class="upload-container">
-    <div class="upload-card">
-        <h2><i class="fas fa-cloud-upload-alt"></i> Upload Document</h2>
+<div class="row justify-content-center align-items-center" style="min-height: 75vh;">
+  <div class="col-md-8 col-lg-6">
+    <div class="card shadow-lg p-5 rounded-4 border-0">
+      <div class="text-center mb-4">
+        <i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3"></i>
+        <h3 class="fw-bold">Upload Document</h3>
+        <p class="text-muted">Easily upload your requirement documents for AI-powered review</p>
+      </div>
 
-        <!-- Success & Error Alerts -->
-        <div id="successAlert" class="alert alert-success d-none" role="alert"></div>
-        <div id="errorAlert" class="alert alert-danger d-none" role="alert"></div>
+      <!-- ✅ Success & Error Alerts -->
+      <div id="successAlert" class="alert alert-success d-none" role="alert"></div>
+      <div id="errorAlert" class="alert alert-danger d-none" role="alert"></div>
 
-        <!-- Upload Form -->
-        <form id="uploadForm" enctype="multipart/form-data">
-            {% csrf_token %}
-            <!-- Drag & Drop Zone -->
-            <div class="drop-zone" id="dropZone">
-                <i class="fas fa-file-alt file-icon"></i>
-                <p>Drag & Drop Files Here</p>
-                <p class="or-text">or</p>
+      <!-- ✅ Upload Form -->
+      <form id="uploadForm" enctype="multipart/form-data" data-url="{% url 'upload_file' %}">
+        {% csrf_token %}
 
-                <!-- Browse Button -->
-                <label class="custom-file-upload" id="browseBtn">
-                    <i class="fas fa-folder-open"></i> Browse Files
-                    <input type="file" id="fileInput" name="document" hidden>
-                </label>
-            </div>
+        <!-- ✅ Drag & Drop Zone -->
+        <div class="drop-zone text-center p-4 mb-3 rounded-3 border border-2 border-dashed" id="dropZone">
+          <i class="fas fa-file-alt fa-2x text-secondary mb-2"></i>
+          <p class="mb-1 fw-semibold">Drag & Drop your files here</p>
+          <p class="text-muted small mb-2">Supported formats: PDF, DOCX</p>
+          <label class="btn btn-outline-primary btn-sm px-4" id="browseBtn">
+            <i class="fas fa-folder-open me-1"></i> Browse Files
+            <input type="file" id="fileInput" name="document" hidden>
+          </label>
+        </div>
 
-            <!-- Selected File Preview -->
-            <div id="selectedFile" class="selected-file d-none">
-                <span id="fileName"></span>
-                <button type="button" class="btn btn-sm btn-danger" id="removeFile">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
+        <!-- ✅ Selected File Preview -->
+        <div id="selectedFile" class="d-flex justify-content-between align-items-center bg-light border rounded-3 px-3 py-2 mb-3 d-none">
+          <span id="fileName" class="text-truncate"></span>
+          <button type="button" class="btn btn-sm btn-danger" id="removeFile">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
 
-            <!-- Progress Bar -->
-            <div class="progress mt-3 d-none" id="progressBarContainer">
-                <div id="progressBar" class="progress-bar" role="progressbar" 
-                     style="width: 0%;" aria-valuemin="0" aria-valuemax="100">
-                    <span id="progressText">0%</span>
-                </div>
-            </div>
+        <!-- ✅ Progress Bar -->
+        <div class="progress mb-3 d-none" id="progressBarContainer" style="height: 22px;">
+          <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+               style="width: 0%;" aria-valuemin="0" aria-valuemax="100">
+            <span id="progressText">0%</span>
+          </div>
+        </div>
 
-            <!-- Upload Button -->
-            <button type="submit" id="uploadButton" class="btn-upload mt-3">
-                <i class="fas fa-upload"></i> Upload Document
-            </button>
-        </form>
+        <!-- ✅ Upload Button -->
+        <button type="submit" id="uploadButton" class="btn btn-primary w-100 fw-bold py-2">
+          <i class="fas fa-upload me-2"></i> Upload Document
+        </button>
+      </form>
     </div>
+  </div>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
-<!-- Custom JS (after jQuery & Bootstrap) -->
 <script src="{% static 'Document/js/upload.js' %}"></script>
 {% endblock %}

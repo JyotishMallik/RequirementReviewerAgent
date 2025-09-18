@@ -1,0 +1,46 @@
+{% extends 'base/base.html' %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="p-5 mb-4 rounded-3 text-white" 
+     style="background: linear-gradient(135deg, #4e73df, #1cc88a); text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">
+  <div class="hero p-5 rounded-3">
+    <h1 class="display-4 fw-bold">Welcome to Document Manager</h1>
+    <p class="lead">Upload, manage, and review your documents with AI-powered insights.</p>
+
+    {% if not user.is_authenticated %}
+      <a class="btn btn-light btn-lg fw-bold" href="{% url 'signup' %}">Get Started <i class="fas fa-arrow-right ms-2"></i></a>
+    {% else %}
+      <a class="btn btn-dark btn-lg fw-bold" href="{% url 'upload_file' %}">Get Started <i class="fas fa-cloud-upload-alt ms-2"></i></a>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Feature Blocks Section -->
+<div class="row text-center g-4 mb-5">
+  <!-- Upload Document Block -->
+  <div class="col-md-6">
+    <div class="card h-100 shadow-sm border-0">
+      <div class="card-body d-flex flex-column justify-content-center align-items-center">
+        <i class="fas fa-upload fa-3x mb-3 text-primary"></i>
+        <h5 class="card-title fw-bold">Upload Document</h5>
+        <p class="card-text">Easily upload your PDF or DOCX documents for AI analysis and storage.</p>
+        <a href="{% url 'upload_file' %}" class="btn btn-primary mt-auto">Upload Now</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Files Section Block -->
+  <div class="col-md-6">
+    <div class="card h-100 shadow-sm border-0">
+      <div class="card-body d-flex flex-column justify-content-center align-items-center">
+        <i class="fas fa-file-alt fa-3x mb-3 text-success"></i>
+        <h5 class="card-title fw-bold">View Files</h5>
+        <p class="card-text">Browse all your uploaded documents and review AI-generated insights.</p>
+        <a href="{% url 'show_files' %}" class="btn btn-success mt-auto">View Files</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

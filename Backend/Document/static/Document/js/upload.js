@@ -14,22 +14,8 @@ $(document).ready(function () {
 
     let selectedFile = null;
 
-    // Get CSRF token from cookie
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-    const csrftoken = getCookie('csrftoken');
+    // ✅ Get CSRF token from hidden input rendered by Django
+    const csrftoken = $("input[name=csrfmiddlewaretoken]").val();
 
     // Handle file selection
     fileInput.on('change', function () {
@@ -82,15 +68,17 @@ $(document).ready(function () {
 
         if (!selectedFile) {
             errorAlert.text("⚠️ Please select a file before uploading.")
-                      .removeClass('d-none');
+                .removeClass('d-none');
             return;
         }
 
         const formData = new FormData();
         formData.append('document', selectedFile);
+
+        // ✅ Send extra metadata so Django can use it
         formData.append('fileName', selectedFile.name);
+        formData.append('fileType', selectedFile.type || 'application/octet-stream');
         formData.append('fileSize', selectedFile.size);
-        formData.append('fileType', selectedFile.type);
 
         progressBarContainer.removeClass('d-none');
         progressBar.css('width', '0%');
@@ -99,12 +87,15 @@ $(document).ready(function () {
         errorAlert.addClass('d-none');
 
         $.ajax({
-            url: '/documents/upload/',
+            url: uploadForm.data('url'),   // ✅ Use URL from template
             type: 'POST',
             headers: { 'X-CSRFToken': csrftoken },
             data: formData,
             processData: false,
             contentType: false,
+            xhrFields: {
+                withCredentials: true  // ✅ Send session cookie so Django knows the user
+            },
             xhr: function () {
                 let xhr = new window.XMLHttpRequest();
                 xhr.upload.addEventListener("progress", function (evt) {
@@ -113,7 +104,6 @@ $(document).ready(function () {
                         progressBar.css('width', percentComplete + '%');
                         progressText.text(percentComplete + '%');
 
-                        // When upload is done, show "Processing…"
                         if (percentComplete === 100) {
                             progressText.text("Processing…");
                         }
@@ -123,21 +113,22 @@ $(document).ready(function () {
             },
             success: function (response) {
                 successAlert.text("✅ File uploaded & processed successfully!")
-                            .removeClass('d-none');
+                    .removeClass('d-none');
                 errorAlert.addClass('d-none');
 
-                // Reset file input & preview for next upload
                 fileInput.val('');
                 selectedFile = null;
                 selectedFileContainer.addClass('d-none');
 
-                // Keep bar full but update label
                 progressBar.css('width', '100%');
                 progressText.text("Done");
+
+                // Optionally redirect to files page
+                // window.location.href = "/files/";
             },
             error: function (xhr, status, error) {
-                errorAlert.text("❌ Upload failed: " + error)
-                          .removeClass('d-none');
+                errorAlert.text("❌ Upload failed: " + (xhr.responseText || error))
+                    .removeClass('d-none');
                 successAlert.addClass('d-none');
                 progressText.text("Failed");
             }
