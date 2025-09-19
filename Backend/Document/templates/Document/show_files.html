@@ -7,7 +7,6 @@
 <div class="card shadow-sm p-4">
     <h2 class="mb-4"><i class="fas fa-file-alt me-2"></i>Uploaded Files</h2>
 
-    <!-- Filters -->
     <form method="get" class="row g-3 mb-4 align-items-end">
         <div class="col-md-3">
             <label for="file_type" class="form-label">File Type</label>
@@ -46,7 +45,6 @@
         </div>
     </form>
 
-    <!-- Messages -->
     {% if messages %}
         {% for message in messages %}
             <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
@@ -56,39 +54,47 @@
         {% endfor %}
     {% endif %}
 
-    <!-- Table -->
     <div class="table-responsive">
         <table class="table table-striped table-hover table-bordered align-middle">
             <thead class="table-dark">
                 <tr>
-                    <th>File Name</th>
+                    <th>Requirement File</th>
+                    <th>Check Type</th>
+                    <th>Rule Based File</th>
                     <th>Uploaded By</th>
-                    <th>File Type</th>
-                    <th>File Size (Bytes)</th>
                     <th>Uploaded On</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
-                {% for file in page_obj %}
+                {% for req_doc in requirement_docs %}
                 <tr>
-                    <td>{{ file.file_name }}</td>
-                    <td>{{ file.uploaded_by.get_full_name|default:file.uploaded_by.username }}</td>
-                    <td>{{ file.file_type }}</td>
-                    <td>{{ file.file_size }}</td>
-                    <td>{{ file.uploaded_at|date:"d M Y H:i" }}</td>
+                    <td>
+                        <a href="{% url 'view_file' req_doc.id %}" target="_blank">
+                            {{ req_doc.req_file_name }}
+                        </a>
+                    </td>
+                    <td>{{ req_doc.check_type }}</td>
+                    <td>
+                        {% if req_doc.check_type == 'basic_check' %}
+                            N/A
+                        {% else %}
+                            <a href="{% url 'view_file' req_doc.id %}" target="_blank">
+                                {{ req_doc.rule_file_name }}
+                            </a>
+                        {% endif %}
+                    </td>
+                    <td>{{ req_doc.uploaded_by.get_full_name|default:req_doc.uploaded_by.username }}</td>
+                    <td>{{ req_doc.uploaded_at|date:"d M Y H:i" }}</td>
                     <td>
                         <div class="btn-group" role="group">
-                            <a href="{% url 'view_file' file.id %}" class="btn btn-sm btn-primary" target="_blank">
-                                <i class="fas fa-eye"></i>
-                            </a>
-                            <a href="{% url 'download_file' file.id %}" class="btn btn-sm btn-success">
-                                <i class="fas fa-download"></i>
-                            </a>
-                            <a href="{% url 'view_report' file.id %}" class="btn btn-sm btn-info">
+                            <a href="{% url 'view_report' req_doc.id %}" class="btn btn-sm btn-info" title="View Report Insights">
                                 <i class="fas fa-file-alt"></i>
                             </a>
-                            <form action="{% url 'delete_file' file.id %}" method="post" style="display:inline;">
+                            <a href="{% url 'show_visuals' req_doc.id %}" class="btn btn-sm btn-primary" title="View Visual Report">
+                                <i class="fas fa-chart-bar"></i>
+                            </a>
+                            <form action="{% url 'delete_file' req_doc.id %}" method="post" style="display:inline;">
                                 {% csrf_token %}
                                 <button type="submit" class="btn btn-sm btn-danger"
                                         onclick="return confirm('Are you sure you want to delete this file?');">
@@ -107,31 +113,30 @@
         </table>
     </div>
 
-    <!-- Pagination -->
-    {% if page_obj.has_other_pages %}
+    {% if requirement_docs.has_other_pages %}
     <nav aria-label="Page navigation">
         <ul class="pagination justify-content-center mt-3">
-            {% if page_obj.has_previous %}
+            {% if requirement_docs.has_previous %}
                 <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if selected_file_type %}&file_type={{ selected_file_type }}{% endif %}{% if selected_uploaded_by %}&uploaded_by={{ selected_uploaded_by }}{% endif %}">Previous</a>
+                    <a class="page-link" href="?page={{ requirement_docs.previous_page_number }}{% if selected_file_type %}&file_type={{ selected_file_type }}{% endif %}{% if selected_uploaded_by %}&uploaded_by={{ selected_uploaded_by }}{% endif %}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}">Previous</a>
                 </li>
             {% else %}
                 <li class="page-item disabled"><span class="page-link">Previous</span></li>
             {% endif %}
 
-            {% for num in page_obj.paginator.page_range %}
-                {% if page_obj.number == num %}
+            {% for num in requirement_docs.paginator.page_range %}
+                {% if requirement_docs.number == num %}
                     <li class="page-item active"><span class="page-link">{{ num }}</span></li>
                 {% else %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ num }}{% if selected_file_type %}&file_type={{ selected_file_type }}{% endif %}{% if selected_uploaded_by %}&uploaded_by={{ selected_uploaded_by }}{% endif %}">{{ num }}</a>
+                        <a class="page-link" href="?page={{ num }}{% if selected_file_type %}&file_type={{ selected_file_type }}{% endif %}{% if selected_uploaded_by %}&uploaded_by={{ selected_uploaded_by }}{% endif %}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}">{{ num }}</a>
                     </li>
                 {% endif %}
             {% endfor %}
 
-            {% if page_obj.has_next %}
+            {% if requirement_docs.has_next %}
                 <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if selected_file_type %}&file_type={{ selected_file_type }}{% endif %}{% if selected_uploaded_by %}&uploaded_by={{ selected_uploaded_by }}{% endif %}">Next</a>
+                    <a class="page-link" href="?page={{ requirement_docs.next_page_number }}{% if selected_file_type %}&file_type={{ selected_file_type }}{% endif %}{% if selected_uploaded_by %}&uploaded_by={{ selected_uploaded_by }}{% endif %}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}">Next</a>
                 </li>
             {% else %}
                 <li class="page-item disabled"><span class="page-link">Next</span></li>
