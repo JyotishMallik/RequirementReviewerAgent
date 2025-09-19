@@ -1,0 +1,264 @@
+{% extends "base/base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Visual Insights for Document #{{ file_id }}</h2>
+    <div id="loading-spinner" class="text-center p-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2 text-muted">Generating and analyzing data...</p>
+    </div>
+    <div id="no-data-message" class="alert alert-warning text-center d-none" role="alert">
+        <h4 class="alert-heading">No Visuals Available</h4>
+        <p>No visual data was found for this document. Please ensure the document is valid for analysis.</p>
+    </div>
+    
+    <div id="visual-dashboard" class="row d-none">
+        
+        <div class="col-md-3 mb-4">
+            <div class="card shadow-sm h-100 border-primary">
+                <div class="card-body text-center d-flex flex-column justify-content-center">
+                    <h5 class="card-title text-primary">Overall Quality Score</h5>
+                    <p id="quality-score-display" class="display-3 fw-bold">-</p>
+                    <p id="quality-score-note" class="text-muted"></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-4">
+            <div class="card shadow-sm h-100 border-success">
+                <div class="card-body text-center d-flex flex-column justify-content-center">
+                    <h5 class="card-title text-success">Readability Score</h5>
+                    <p id="readability-score-display" class="display-3 fw-bold">-</p>
+                    <p id="readability-score-note" class="text-muted"></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-light fw-bold">Issue Breakdown</div>
+                <div class="card-body">
+                    <div id="issue-breakdown-chart" style="height: 300px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-light fw-bold">Sentiment Distribution</div>
+                <div class="card-body">
+                    <div id="sentiment-chart" style="height: 300px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-light fw-bold">Compliance Status</div>
+                <ul id="compliance-list" class="list-group list-group-flush"></ul>
+            </div>
+        </div>
+
+        <div class="col-12 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-light fw-bold">Key Phrases</div>
+                <div class="card-body text-center">
+                    <div id="word-cloud-chart" style="height: 400px;"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts-wordcloud@2.1.0/dist/echarts-wordcloud.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const fileId = "{{ file_id }}";
+        const dashboard = document.getElementById('visual-dashboard');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const noDataMessage = document.getElementById('no-data-message');
+
+        function showMessage(messageId) {
+            dashboard.classList.add('d-none');
+            loadingSpinner.classList.add('d-none');
+            noDataMessage.classList.add('d-none');
+            document.getElementById(messageId).classList.remove('d-none');
+        }
+
+        fetch(`/get_visual_data/${fileId}/`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                loadingSpinner.classList.add('d-none');
+
+                if (data.error || Object.keys(data).length === 0) {
+                    showMessage('no-data-message');
+                    return;
+                }
+
+                dashboard.classList.remove('d-none');
+
+                // Helper function to get a random color
+                const getRandomColor = () => {
+                    const letters = '0123456789ABCDEF';
+                    let color = '#';
+                    for (let i = 0; i < 6; i++) {
+                        color += letters[Math.floor(Math.random() * 16)];
+                    }
+                    return color;
+                };
+
+                // 1. Overall Quality Score Display
+                const qualityScore = data.overall_quality_score;
+                if (qualityScore !== undefined && qualityScore !== null) {
+                    document.getElementById('quality-score-display').innerText = qualityScore;
+                    let note = "";
+                    if (qualityScore >= 80) note = "Excellent quality";
+                    else if (qualityScore >= 60) note = "Good quality, minor improvements needed";
+                    else if (qualityScore >= 40) note = "Fair quality, major improvements recommended";
+                    else note = "Poor quality, significant rewrite needed";
+                    document.getElementById('quality-score-note').innerText = note;
+                }
+
+                // 2. Readability Score Display
+                const readabilityScore = data.readability_score;
+                if (readabilityScore !== undefined && readabilityScore !== null) {
+                    document.getElementById('readability-score-display').innerText = readabilityScore.toFixed(1);
+                    document.getElementById('readability-score-note').innerText = "On a scale of 0-100";
+                }
+
+                // 3. Issue Breakdown Chart (Pie)
+                if (data.issue_breakdown && Object.keys(data.issue_breakdown).length > 0) {
+                    const issueData = Object.keys(data.issue_breakdown).map(key => ({
+                        value: data.issue_breakdown[key],
+                        name: key
+                    }));
+                    const issueChart = echarts.init(document.getElementById('issue-breakdown-chart'));
+                    issueChart.setOption({
+                        tooltip: { trigger: 'item' },
+                        legend: { bottom: 0, left: 'center' },
+                        series: [{
+                            name: 'Issue Breakdown',
+                            type: 'pie',
+                            radius: ['40%', '70%'],
+                            avoidLabelOverlap: false,
+                            label: { show: false, position: 'center' },
+                            emphasis: { label: { show: true, fontSize: 20, fontWeight: 'bold' } },
+                            labelLine: { show: false },
+                            data: issueData
+                        }]
+                    });
+                } else {
+                    document.getElementById('issue-breakdown-chart').innerHTML = '<div class="alert alert-info mt-3">Issue breakdown data not available.</div>';
+                }
+
+                // 4. Sentiment Chart (Bar)
+                if (data.sentiment_distribution && Object.keys(data.sentiment_distribution).length > 0) {
+                    const sentimentChart = echarts.init(document.getElementById('sentiment-chart'));
+                    sentimentChart.setOption({
+                        tooltip: {},
+                        xAxis: { type: 'category', data: Object.keys(data.sentiment_distribution) },
+                        yAxis: { type: 'value' },
+                        series: [{
+                            name: 'Word Count',
+                            type: 'bar',
+                            data: Object.values(data.sentiment_distribution),
+                            itemStyle: {
+                                color: (params) => {
+                                    const colors = {'positive': '#4CAF50', 'neutral': '#FFC107', 'negative': '#F44336'};
+                                    return colors[params.name] || '#6c757d';
+                                }
+                            }
+                        }]
+                    });
+                } else {
+                    document.getElementById('sentiment-chart').innerHTML = '<div class="alert alert-info mt-3">Sentiment data not available.</div>';
+                }
+
+                // 5. Compliance Summary List
+                if (data.compliance_summary && Object.keys(data.compliance_summary).length > 0) {
+                    const complianceList = document.getElementById('compliance-list');
+                    for (const [key, value] of Object.entries(data.compliance_summary)) {
+                        const li = document.createElement('li');
+                        const statusClass = value.status === 'compliant' ? 'list-group-item-success' : 'list-group-item-danger';
+                        li.className = `list-group-item d-flex justify-content-between align-items-center ${statusClass}`;
+                        li.innerHTML = `
+                            <span>${key}</span>
+                            <span class="badge bg-${value.status === 'compliant' ? 'success' : 'danger'}">${value.status.toUpperCase()}</span>
+                        `;
+                        complianceList.appendChild(li);
+                    }
+                } else {
+                    document.getElementById('compliance-list').innerHTML = '<li class="list-group-item text-center text-muted">No compliance data available.</li>';
+                }
+
+                // 6. Word Cloud Chart
+                if (data.key_phrases && Array.isArray(data.key_phrases) && data.key_phrases.length > 0) {
+                    const wordCloudData = data.key_phrases.map(phrase => ({
+                        name: phrase,
+                        // Assign a value based on a simple heuristic or random if no frequency is available
+                        // For better visuals, higher value should be given to more important/frequent phrases
+                        // For now, let's just make the range slightly varied for better distribution
+                        value: Math.floor(Math.random() * (80 - 30 + 1)) + 30 // Adjusted range for better visual distribution
+                    }));
+                    
+                    const wordCloudChart = echarts.init(document.getElementById('word-cloud-chart'));
+                    wordCloudChart.setOption({
+                        series: [{
+                            type: 'wordCloud',
+                            shape: 'circle', // Can also try 'diamond', 'triangle', 'pentagon', 'star'
+                            sizeRange: [18, 70], // Increased min size, adjusted max size
+                            rotationRange: [-45, 45], // More controlled rotation
+                            gridSize: 15, // Increased padding between words significantly
+                            drawOutOfBound: false, // Prevents words from going outside the canvas too much
+                            layoutAnimation: true,
+                            textStyle: {
+                                normal: {
+                                    fontFamily: 'Impact', // A bolder font often works well
+                                    fontWeight: 'normal', // Can be 'bold' too
+                                    color: function () {
+                                        // Provide a range of colors for better aesthetics
+                                        const colors = ['#4285F4', '#DB4437', '#F4B400', '#0F9D58', '#42A5F5', '#EF5350'];
+                                        return colors[Math.floor(Math.random() * colors.length)];
+                                    }
+                                },
+                                emphasis: {
+                                    shadowBlur: 8,
+                                    shadowColor: '#666',
+                                    // Make hovered word stand out more clearly
+                                    textStyle: {
+                                        color: '#000' // Darker color on hover
+                                    }
+                                }
+                            },
+                            data: wordCloudData
+                        }]
+                    });
+                } else {
+                    document.getElementById('word-cloud-chart').innerHTML = '<div class="alert alert-info mt-3">Key phrases data not available.</div>';
+                }
+
+                // Resize charts on window resize
+                window.addEventListener('resize', () => {
+                    if (document.getElementById('issue-breakdown-chart')) echarts.getInstanceByDom(document.getElementById('issue-breakdown-chart')).resize();
+                    if (document.getElementById('sentiment-chart')) echarts.getInstanceByDom(document.getElementById('sentiment-chart')).resize();
+                    if (document.getElementById('word-cloud-chart')) echarts.getInstanceByDom(document.getElementById('word-cloud-chart')).resize();
+                });
+
+            })
+            .catch(error => {
+                console.error('Error fetching visual data:', error);
+                showMessage('no-data-message');
+                document.getElementById('no-data-message').innerHTML = `<h4 class="alert-heading">Error!</h4><p>Failed to load visual data. Please try again later.</p>`;
+            });
+    });
+</script>
+{% endblock %}

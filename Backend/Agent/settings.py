@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'Document',
-    'Home'
+    'widget_tweaks',
 ]
 
 MIDDLEWARE = [
@@ -124,4 +124,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # Replace with your actual Gemini API key
-GEMINI_API_KEY = "YOUR_GEMINI_API_KEY"
+GEMINI_API_KEY = ""
+
+
+# Login
+LOGIN_URL = 'login'              # where users are redirected if not logged in
+LOGIN_REDIRECT_URL = 'home'      # after successful login
+LOGOUT_REDIRECT_URL = 'login'    # after logout
