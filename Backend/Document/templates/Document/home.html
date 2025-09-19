@@ -3,9 +3,8 @@
 
 {% block content %}
 <!-- Hero Section -->
-<div class="p-5 mb-4 rounded-3 text-white" 
-     style="background: linear-gradient(135deg, #4e73df, #1cc88a); text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">
-  <div class="hero p-5 rounded-3">
+<div class="mb-5 rounded-3 text-white text-center" 
+     style="padding: 6rem; background: linear-gradient(135deg, #4e73df, #1cc88a); text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">
     <h1 class="display-4 fw-bold">Welcome to Document Manager</h1>
     <p class="lead">Upload, manage, and review your documents with AI-powered insights.</p>
 
@@ -14,9 +13,8 @@
     {% else %}
       <a class="btn btn-dark btn-lg fw-bold" href="{% url 'upload_file' %}">Get Started <i class="fas fa-cloud-upload-alt ms-2"></i></a>
     {% endif %}
-  </div>
 </div>
-
+<hr>
 <!-- Feature Blocks Section -->
 <div class="row text-center g-4 mb-5">
   <!-- Upload Document Block -->

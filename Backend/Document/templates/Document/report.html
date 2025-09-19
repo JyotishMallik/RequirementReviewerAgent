@@ -1,15 +1,15 @@
 {% extends "base/base.html" %}
 {% load static %}
 
-{% block title %}Report - {{ file.file.name }}{% endblock %}
+{% block title %}Report - {{ file.req_file.name }}{% endblock %}
 
 {% block content %}
-<h2>Report for {{ file.file.name|slice:"10:" }}</h2>
+<h2>Report for {{ file.req_file.name|slice:"10:" }}</h2>
 <hr>
 
 <p><strong>Uploaded By:</strong> {{ file.uploaded_by }}</p>
-<p><strong>File Type:</strong> {{ file.file_type }}</p>
-<p><strong>File Size:</strong> {{ file.file_size }} bytes</p>
+<p><strong>File Type:</strong> {{ file.req_file_type }}</p>
+<p><strong>File Size:</strong> {{ file.req_file_size }} bytes</p>
 <p><strong>Uploaded At:</strong> {{ file.uploaded_at|date:"d M Y H:i" }}</p>
 
 <div class="card shadow-sm">
